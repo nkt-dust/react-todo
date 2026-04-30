@@ -4,7 +4,11 @@ import { useState } from "react";
 function App(){
   // 「todos=現在のToDoリスト(配列)＜現在の引き出しの中身＞」、「setTodos=リストを書き換えるためのスイッチ」
   // 最初は、usestateの記憶の引き出しの中に（牛乳を買う）、（勉強する）が入っている。
-  const [todos,setTodos]=useState(["牛乳を買う","勉強する"]);
+  const [todos,setTodos]=useState([
+    // 名前（text）と状態（done）を持たせる
+    {text:"牛乳を買う", done:false},
+    {text:"勉強する",   done:false}
+  ]);
   // 「input=今の入力欄」「setInput=入力欄を自動で切り替えるリモコン」「useState("")=記憶の引き出しが空白の状態からスタート」
   const [input,setInput]=useState("");
     // addTodoというタスクを追加する関数。追加ボタンを押されると実行される。
@@ -13,7 +17,8 @@ function App(){
     if(input==="") return;
     // 「...todos=今のTODOリストをばらばらに展開（スプレッド構文）」「input=新しいタスク」
     // 今までのタスクに新しいタスクを追加して、(setTodos)で画面の自動更新をする。
-    setTodos([...todos,input]);
+    // 入力欄の文字を名前(text)として保存。状態（done）を最初はfalseで保存し、タスクを追加。
+    setTodos([...todos,{ text:input, done:false}]);
     // 入力欄を空白で上書き。（入力欄のリセット）
     setInput("")
     }
@@ -25,6 +30,22 @@ function App(){
       // 「i=indexの略、数字が入る」「!==は（～ではない）という意味」
       const newTodos=todos.filter((_,i) =>i !==index);
       // 「newTodos=削除したタスク以外のタスクのリスト」setTodosでReactへ送り、画面の更新をする。
+      setTodos(newTodos);
+    }
+    // 選択されたタスクの追跡番号から、状態（done）を切り替える関数。
+    function toggleTodo(index){
+      // タスクから一つずつ出して、todoという名札と番号（i）のラベルをつける。それらをnewTodosの箱へ入れる。
+      // クリックされたタスクか、番号（iとindex）を基にチェック。クリックされたタスクは、一度出して、状態（done）だけ変えて新しい箱に入れる。
+      const newTodos=todos.map((todo,i)=>{
+        // .mapで貼った番号ラベルの数字がクリックされたタスクの番号と同じかチェック。
+        if(i===index){
+          // 箱（todo）から一度textとdoneを机の上に出して、doneを変えて（falseかtrueか）、新しい箱に入れて返す。
+          return{ ...todo, done: !todo.done};
+        }
+        // チェックに引っかからなかったほかのタスクはそのまま返す。
+        return todo;
+      });
+      // 状態を変更した新しいリストをreactへ送る（自動的に画面を更新する）。
       setTodos(newTodos);
     }
   {/* <div>以下の設計図を画面に返す（表示する）。関数が実行されるたびに最新のデータをもとに、設計図をつくる。
@@ -57,18 +78,34 @@ function App(){
         todoの名札が貼られた中身の中から、適する追跡番号を貼られたテキストを表示。 */}
         {todos.map((todo,index)=>(
           // index(タスクの追跡番号)に対応するタスクがリストに表示される。
-          <li key={index}>
-            {todo}
-            {/* 削除ボタンがクリックされると、indexの番号に応じたタスクが削除される（removeTodoの実行）。 */}
-            <button onClick={()=>removeTodo(index)}>削除</button>
+          <li
+          // 追跡番号に対応した番号のタスクを探す。
+           key={index}
+          //  リストの文字（li全体）をクリックすると、(index)番号に対応したタスクにtoggleTodo関数が実行される。（状態の切り替え）
+           onClick={()=>toggleTodo(index)}
+          // 完了したタスクに打ち消し線を引く。
+          // style={js書くよ{styleの情報をオブジェクトとしてまとめる}}という二つの括弧。「textDecoration」→文字にデザインをするという宣言。
+          // 「todo.done ? "line-through:"none""」→todo.doneがtrue?はいなら打ち消し線、いいえなら線をなしにする。
+          // 「corsor:"pointer"」→マウスを載せたら指マークにする。style→CSSの力を借りるという宣言。
+           style={{textDecoration:todo.done ? "line-through":"none",cursor:"pointer"}}
+          >
+            {/* タスクのテキストを表示する。（todoには、textとdoneの二つの情報が入っているため、.textでテキストのみ呼び出す。） */}
+            {todo.text}
+            {/* 削除ボタンがクリックされると、クリックした情報を親に伝わらないように止め、indexの番号に応じたタスクが削除される（removeTodoの実行）。
+            「e.stopPrapagation()」タスクのテキスト（<li>、親）の中にある削除ボタン（子）が押された時に、クリックされたという情報を親にまで送らないという機能。
+            「e」=イベント（クリック）。「e」（引数）には、クリックに関する詳しい情報が入る（どのボタンか、いつ押されたか、）。
+            */}
+            <button onClick={(e)=>{e.stopPropagation();removeTodo(index);}}>削除</button>
             </li>
         ))}
       </ul>
     </div>
   );
 }
-
+// APPという部品をほかのファイルでも使えるようにする公開設定。
 export default App;
 // Reactは何回関数を実行したか分かっている。関数を実行して表示したテキストへ、削除や変更を感知できるように一時的な追跡番号をつけ、
 // 関数が実行されるたび、違いをすぐ感知して、変わった部分のみ変更する。
+
+// React難しい。JSのコードを短縮・省略・効率化しているように感じる。
 
