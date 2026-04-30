@@ -1,3 +1,5 @@
+// 「TodoItem」という関数を「TodoItem」というファイルから借りてくる。
+import TodoItem from "./TodoItem";
 // useStateを使うためにreactから借りてくる。
 import { useState } from "react";
 // Appという部品を作る。
@@ -68,36 +70,24 @@ function App(){
         {/* 追加ボタンがクリックされると、「addTodo」関数が実行される。タスクの追加。 */}
         <button onClick={addTodo}>追加</button>
       <ul>
-        {/* {}内はJS。「todos.map(...)=」todos（配列）から中身を一つずつ取り出して加工
-        （todoという名札をつけて、追跡ラベル＜何回目に実行された中身かの番号＞を貼る）
-        するという命令。.map=全自動コピー機*/}
-        {/* （todo,index）=todo：中身、index：その中身の追跡番号。一時的な管理番号。mapへの加工の指示*/}
-        {/* 「=>」＝アロー関数。下の行の形に変形させる。 */}
-        {/* <li>HTMLのリストへの表示の指示。（JSの中にHTMLのコードがある。）「key={index}」=Reactへと伝える管理番号（追跡番号）。
-        indexの番号のtodoがテキストとしてリストに表示される。
-        todoの名札が貼られた中身の中から、適する追跡番号を貼られたテキストを表示。 */}
-        {todos.map((todo,index)=>(
-          // index(タスクの追跡番号)に対応するタスクがリストに表示される。
-          <li
-          // 追跡番号に対応した番号のタスクを探す。
-           key={index}
-          //  リストの文字（li全体）をクリックすると、(index)番号に対応したタスクにtoggleTodo関数が実行される。（状態の切り替え）
-           onClick={()=>toggleTodo(index)}
-          // 完了したタスクに打ち消し線を引く。
-          // style={js書くよ{styleの情報をオブジェクトとしてまとめる}}という二つの括弧。「textDecoration」→文字にデザインをするという宣言。
-          // 「todo.done ? "line-through:"none""」→todo.doneがtrue?はいなら打ち消し線、いいえなら線をなしにする。
-          // 「corsor:"pointer"」→マウスを載せたら指マークにする。style→CSSの力を借りるという宣言。
-           style={{textDecoration:todo.done ? "line-through":"none",cursor:"pointer"}}
-          >
-            {/* タスクのテキストを表示する。（todoには、textとdoneの二つの情報が入っているため、.textでテキストのみ呼び出す。） */}
-            {todo.text}
-            {/* 削除ボタンがクリックされると、クリックした情報を親に伝わらないように止め、indexの番号に応じたタスクが削除される（removeTodoの実行）。
-            「e.stopPrapagation()」タスクのテキスト（<li>、親）の中にある削除ボタン（子）が押された時に、クリックされたという情報を親にまで送らないという機能。
-            「e」=イベント（クリック）。「e」（引数）には、クリックに関する詳しい情報が入る（どのボタンか、いつ押されたか、）。
-            */}
-            <button onClick={(e)=>{e.stopPropagation();removeTodo(index);}}>削除</button>
-            </li>
-        ))}
+        {/* 現在のToDoリスト（todos）から一つずつ取り出して、todo（名札）とindex（番号）のラベルを張り付けていく。（繰り返し処理）
+        「todo=オブジェクト（データ）」→「todo(text,done),index」を張り付ける加工を.mapがtodos（現在のToDoリスト）すべてに一つずつおこなう。 */}
+          {todos.map((todo, index)=>(
+            // 一行分の部品。一行の　以下がpropsの中身。荷物の一覧。「props=AppからTodoItemへの贈り物の荷物（材料や道具）たち」
+            // AppからTodoItemへ材料や道具を送っている。右がApp.jsxの材料。左がTodoItemで受け取る箱（場所）。
+            <TodoItem
+            // 番号を(key)という箱に入れて送る。key=Reactが見失わないための追跡番号。indexの番号は変わる（追跡番号ではない。順番の方が近い？）
+            key={index}
+            // todoというデータ(text,done)をTodoItemへ送る。
+            todo={todo}
+            // タスクについた番号をTodoItemへ知らせる。
+            index={index}
+            // toggleTodo関数を、TodoItemのonToggleという道具で呼び出せるようにする
+            onToggle={toggleTodo}
+            // remove関数を、TodoItemのonRemoveという道具で呼び出せるようにする
+            onRemove={removeTodo}
+            />
+          ))}
       </ul>
     </div>
   );
