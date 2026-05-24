@@ -1,18 +1,38 @@
+//===TS化の設計メモ===
+//目的:JSのToDoアプリにTypeScriptを導入する
+//データ構造:
+//  ToDo={text:string,done:boolean}
+// state:
+//  todos:Todo[](Todoの配列)
+//  input:string
+//関数:
+//  addTodo():void(戻り値なし)
+//  removeTodo(index:number):void
+//  toggleTodo(index:number):void
+
 // 「TodoItem」という関数を「TodoItem」というファイルから借りてくる。
 import TodoItem from "./TodoItem";
 // useStateを使うためにreactから借りてくる。
 import { useState } from "react";
+// Todo(オブジェクト)へと入るプロパティの型を宣言(データ構造を定義)
+interface Todo{
+  text:string;
+  done:boolean;
+}
 // Appという部品を作る。
 function App(){
   // 「todos=現在のToDoリスト(配列)＜現在の引き出しの中身＞」、「setTodos=リストを書き換えるためのスイッチ」
   // 最初は、usestateの記憶の引き出しの中に（牛乳を買う）、（勉強する）が入っている。
-  const [todos,setTodos]=useState([
+  // 「<Todo[]>は箱（todos）にはTodoの配列しか入らないという型の宣言」
+  // 「<>=ジェネリクス→箱の中身の型を指定する」
+  const [todos,setTodos]=useState<Todo[]>([
     // 名前（text）と状態（done）を持たせる
     {text:"牛乳を買う", done:false},
     {text:"勉強する",   done:false}
   ]);
   // 「input=今の入力欄」「setInput=入力欄を自動で切り替えるリモコン」「useState("")=記憶の引き出しが空白の状態からスタート」
-  const [input,setInput]=useState("");
+  // inputは文字列しか入らないと型の宣言。「（""）からTSが文字列だと推論してくれるので省略もできる（型推論）」
+  const [input,setInput]=useState<string>("");
     // addTodoというタスクを追加する関数。追加ボタンを押されると実行される。
     function addTodo(){
     // もしも入力欄が空白なら、以下の関数は実行しない
@@ -25,7 +45,8 @@ function App(){
     setInput("")
     }
     // (index)の追跡番号のタスクを削除する関数。削除ボタンを押されると実行。
-    function removeTodo(index){
+    // indexには数字のみが入ると宣言
+    function removeTodo(index:number){
       // 今のタスク（todos）の中から、一つずつふるいにかけて条件に合うかチェックしていく。条件に合うもの以外の新しいリスト（newTodos）を作成する。
       // タスクを一つとって、タスクの番号（i）がindex(今回削除の対象の番号)ではない（!==）場合newTodosに入れる。
       // 「_」は本当はなにかデータが入る場所だが、今回はなにも入らないという意味（今回は番号だけのフィルターなので、タスクの内容は不要なため）。
@@ -35,7 +56,8 @@ function App(){
       setTodos(newTodos);
     }
     // 選択されたタスクの追跡番号から、状態（done）を切り替える関数。
-    function toggleTodo(index){
+    // indexには数字のみが入ると宣言
+    function toggleTodo(index:number){
       // タスクから一つずつ出して、todoという名札と番号（i）のラベルをつける。それらをnewTodosの箱へ入れる。
       // クリックされたタスクか、番号（iとindex）を基にチェック。クリックされたタスクは、一度出して、状態（done）だけ変えて新しい箱に入れる。
       const newTodos=todos.map((todo,i)=>{

@@ -1,6 +1,23 @@
+// Todo(オブジェクト)の中身のtext,done（プロパティ）の型を宣言(設計図)
+interface Todo{
+    text:string;
+    done:boolean;
+}
+// TodoItemが受け取るprops(引数)の設計図
+interface TodoItemProps{
+    // todoオブジェクトはTodoと同じ型宣言（text,done）
+    todo:Todo;
+    // indexには数字が入るという型宣言
+    index:number;
+    // 「onToggle=App.tsxから借りてきた道具（関数）」引数indexは数字と型宣言。なにも返さない。
+    onToggle:(index:number)=>void;
+    // 「onREmove=App.tsxから借りてきた道具（関数）」引数indexは数字と型宣言。なにも返さない。
+    onRemove:(index:number)=>void;
+}
 // TodoItemという関数引数に（todo,index,onToggle,onRemove）を受ける。
 // 分割代入「()の中に｛｝で包んで入れること」→届いた荷物（オブジェト、引数）を（）内の種類に分けて、いつでも出せるようにして包む。
-function TodoItem({todo,index,onToggle,onRemove}){
+// 上のTodoItemProps設計図の型宣言が適用される
+function TodoItem({todo,index,onToggle,onRemove}:TodoItemProps){
     // 以下のものを画面に写すように設計図を返す。
     return(
         // リストのテキストを表示する。
